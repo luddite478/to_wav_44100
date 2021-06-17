@@ -1,4 +1,4 @@
-## Program to convert or extract and convert audio track from a media file to 2 channel wav 44100Hz file
+## Program to convert (or extract and convert) audio track from a media file to 2 channel wav 44100Hz file
 
 ### List of supported input extentions:  
 *.mp3, .wav, .aac, .ogg, .flac, .aiff, .pcm, .mp4, .mkv, .flv, .avi, .webm, .mpeg, .mpg*
