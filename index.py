@@ -131,7 +131,7 @@ for f_path in files_to_process:
         continue
         
     if not validate_ext(str((p))):
-        print(f_path, 'is not an audio file, skipping')
+        print(f_path, 'is not a media file, skipping')
         continue
 
     t = threading.Thread(target=convert_to_wav_44100, args=(f_path,))   
