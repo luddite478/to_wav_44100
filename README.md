@@ -8,5 +8,5 @@
 *Output will appear in the dist folder*
 
 ### Run
-*Note: input files will be deleted*
+*Note: input files will be deleted* \
 `./to_wav_44100 <folder_or_file_to_convert>`
