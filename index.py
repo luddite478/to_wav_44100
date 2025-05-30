@@ -74,17 +74,13 @@ def convert_to_wav_44100(file_path):
 
 def main():
     parser = argparse.ArgumentParser(description="Convert media files to WAV 44.1kHz stereo")
-    parser.add_argument('Path', metavar='path', type=str, help='Absolute file or folder path')
+    parser.add_argument('Path', metavar='path', type=str, help='File or folder path (absolute or relative)')
     args = parser.parse_args()
 
-    input_path = Path(args.Path)
+    input_path = Path(args.Path).expanduser().resolve()  # Support relative paths
 
     if not input_path.exists():
         print('The path specified does not exist')
-        sys.exit(1)
-
-    if not input_path.is_absolute():
-        print('Specify an absolute path')
         sys.exit(1)
 
     files_to_process = []
