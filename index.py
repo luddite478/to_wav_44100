@@ -49,12 +49,12 @@ def convert_to_wav_44100(file_path):
     convert_cmd = [
         'ffmpeg',
         '-hide_banner',
-        '-ac', '2',
         '-i', str(temp_input_path),
-        '-vn',
+        '-vn',                         
         '-sample_rate', '44100',
         '-ar', '44100',
-        '-filter:a', 'loudnorm',
+        '-ac', '1',                      
+        '-filter:a', 'loudnorm',       
         '-y', str(output_path)
     ]
 
