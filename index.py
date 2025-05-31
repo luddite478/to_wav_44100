@@ -2,10 +2,12 @@ import argparse
 import os
 import sys
 from pathlib import Path
-import threading
 import subprocess as sp
-import itertools
 import shutil
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+# Limit of concurrent FFmpeg conversions
+MAX_CONCURRENT_JOBS = 4  # Change this to control resource usage
 
 # Supported media extensions
 def validate_ext(path):
@@ -53,8 +55,8 @@ def convert_to_wav_44100(file_path):
         '-vn',                         
         '-sample_rate', '44100',
         '-ar', '44100',
-        '-ac', '1',                      
-        '-filter:a', 'loudnorm',       
+        '-ac', '1',                    
+        '-filter:a', 'loudnorm',      
         '-y', str(output_path)
     ]
 
@@ -73,11 +75,11 @@ def convert_to_wav_44100(file_path):
                 print(f"Failed to delete temporary file {temp_input_path}: {e}")
 
 def main():
-    parser = argparse.ArgumentParser(description="Convert media files to WAV 44.1kHz stereo")
-    parser.add_argument('Path', metavar='path', type=str, help='File or folder path (absolute or relative)')
+    parser = argparse.ArgumentParser(description="Convert media files to WAV 44.1kHz mono")
+    parser.add_argument('Path', metavar='path', type=str, help='File or folder path')
     args = parser.parse_args()
 
-    input_path = Path(args.Path).expanduser().resolve()  # Support relative paths
+    input_path = Path(args.Path).expanduser().resolve()
 
     if not input_path.exists():
         print('The path specified does not exist')
@@ -91,20 +93,18 @@ def main():
         files_to_process = listdir_fullpath(str(input_path))
 
     files_to_process = remove_basename_duplicates(files_to_process)
+    files_to_process = [f for f in files_to_process if Path(f).is_file() and validate_ext(f)]
 
-    for f_path in files_to_process:
-        p = Path(f_path)
+    if not files_to_process:
+        print("No valid media files to process.")
+        return
 
-        if not p.is_file():
-            print(f"{f_path} is not a file, skipping")
-            continue
+    print(f"Processing {len(files_to_process)} files with up to {MAX_CONCURRENT_JOBS} concurrent conversions.")
 
-        if not validate_ext(str(p)):
-            print(f"{f_path} is not a media file, skipping")
-            continue
-
-        t = threading.Thread(target=convert_to_wav_44100, args=(str(p),))
-        t.start()
+    with ThreadPoolExecutor(max_workers=MAX_CONCURRENT_JOBS) as executor:
+        futures = [executor.submit(convert_to_wav_44100, f) for f in files_to_process]
+        for future in as_completed(futures):
+            future.result()  # Raise any exceptions
 
 if __name__ == '__main__':
     main()
